@@ -1,0 +1,42 @@
+services:
+    linktic-api:
+        image: bitnami/laravel:latest
+        container_name: linktic-api
+        environment:
+            - DB_HOST=linktic-db
+            - DB_PORT=3306
+            - DB_DATABASE=linkticdb
+            - DB_USERNAME=linkticuser
+            - DB_PASSWORD=secret
+        ports:
+            - "8080:8000"
+        volumes:
+            - .:/app
+        depends_on:
+            - linktic-db
+        command: /bin/bash -c "composer require predis/predis && ./wait-for-it.sh linktic-db:3306 -- php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"
+
+    linktic-db:
+        image: mysql:8.0
+        container_name: linktic-db
+        environment:
+            - MYSQL_ROOT_PASSWORD=rootpassword
+            - MYSQL_DATABASE=linkticdb
+            - MYSQL_USER=linkticuser
+            - MYSQL_PASSWORD=secret
+        ports:
+            - "3307:3306"
+        volumes:
+            - dbdata:/var/lib/mysql
+
+    linktic-redis:
+        image: redis:alpine
+        container_name: linktic-redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - redisdata:/data
+
+volumes:
+    dbdata:
+    redisdata:
