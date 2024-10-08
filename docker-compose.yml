@@ -14,7 +14,8 @@ services:
             - .:/app
         depends_on:
             - linktic-db
-        command: /bin/bash -c "composer require predis/predis && ./wait-for-it.sh linktic-db:3306 -- php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"
+            - linktic-redis
+        command: /bin/bash -c "./wait-for-it.sh linktic-db:3306 -- php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"
 
     linktic-db:
         image: mysql:8.0
@@ -28,6 +29,7 @@ services:
             - "3307:3306"
         volumes:
             - dbdata:/var/lib/mysql
+            - ./mysql-init:/docker-entrypoint-initdb.d # Carpeta para scripts de inicialización
 
     linktic-redis:
         image: redis:alpine
