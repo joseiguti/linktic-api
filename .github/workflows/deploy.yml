@@ -19,11 +19,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to DigitalOcean Docker Registry (opcional si no usas Docker Registry puedes eliminar este paso)
-      - name: Log in to DigitalOcean Docker Registry
-        run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
-
-      # Step 4: SSH into DigitalOcean Droplet, clone repo, and deploy
+      # Step 3: SSH into DigitalOcean Droplet, clone repo, and deploy
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
