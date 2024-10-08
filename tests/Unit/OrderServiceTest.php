@@ -159,7 +159,6 @@ class OrderServiceTest extends TestCase
     /** @test */
     public function it_rolls_back_if_something_fails_during_order_creation()
     {
-        // Simulamos el fallo lanzando una excepción manualmente dentro de una transacción.
         DB::beginTransaction();
 
         try {
