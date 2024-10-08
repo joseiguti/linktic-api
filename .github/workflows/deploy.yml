@@ -35,7 +35,7 @@ jobs:
           docker tag bitnami/laravel:latest registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
-      # Step 6: SSH into DigitalOcean Droplet and Deploy the Image
+      # Step 6: SSH into DigitalOcean Droplet, install Docker Compose, and Deploy the Image
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -43,6 +43,18 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Instalar Docker Compose si no está instalado
+            if ! [ -x "$(command -v docker-compose)" ]; then
+              curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # Autenticar con Docker Registry
+            echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
+
+            # Descargar la última imagen desde el Registry
             docker pull registry.digitalocean.com/linktic-registry/linktic-api:latest
+
+            # Detener y reiniciar los contenedores con la nueva imagen
             docker-compose down
             docker-compose up -d
