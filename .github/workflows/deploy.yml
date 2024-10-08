@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
@@ -23,19 +22,14 @@ jobs:
       - name: Log in to DigitalOcean Docker Registry
         run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
-      # Step 4: Pull Laravel image from Docker Hub (descargar la imagen)
-      - name: Pull Laravel Image
+      # Step 4: Build and Push Docker image to DigitalOcean Registry
+      - name: Build and Push Docker Image
         run: |
           docker pull bitnami/laravel:latest
-
-      # Step 5: Build and Push Docker image to DigitalOcean Registry
-      - name: Build and Push with docker-compose
-        run: |
-          docker compose -f docker-compose.yml build
           docker tag bitnami/laravel:latest registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
-      # Step 6: SSH into DigitalOcean Droplet, install Docker Compose, and Deploy the Image
+      # Step 5: SSH into DigitalOcean Droplet and Deploy the Image
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -43,18 +37,17 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Instalar Docker Compose si no está instalado
-            if ! [ -x "$(command -v docker-compose)" ]; then
-              curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              chmod +x /usr/local/bin/docker-compose
-            fi
-
             # Autenticar con Docker Registry
             echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
             # Descargar la última imagen desde el Registry
             docker pull registry.digitalocean.com/linktic-registry/linktic-api:latest
 
-            # Detener y reiniciar los contenedores con la nueva imagen
-            docker-compose down
-            docker-compose up -d
+            # Ejecutar el contenedor desde la imagen
+            docker run -d --name linktic-api -p 8080:8000 \
+              -e DB_HOST=linktic-db \
+              -e DB_PORT=3306 \
+              -e DB_DATABASE=linkticdb \
+              -e DB_USERNAME=linkticuser \
+              -e DB_PASSWORD=secret \
+              registry.digitalocean.com/linktic-registry/linktic-api:latest
