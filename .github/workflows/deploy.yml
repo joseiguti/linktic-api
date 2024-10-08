@@ -39,8 +39,8 @@ jobs:
             cd /root/linktic-api
 
             # Detener y eliminar contenedores existentes para evitar conflictos
-            docker-compose down --remove-orphans
+            docker-compose down -v --remove-orphans
             docker rm -f linktic-api || true
 
             # Levantar los nuevos contenedores
-            docker-compose up -d
+            docker-compose up -d --build
