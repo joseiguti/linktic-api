@@ -3,7 +3,7 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches:
-      - main  # Ajusta a tu rama principal
+      - main
 
 jobs:
   deploy:
@@ -14,16 +14,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Log in to DigitalOcean Docker Registry
+      # Step 2: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Log in to DigitalOcean Docker Registry
       - name: Log in to DigitalOcean Docker Registry
         run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
-      # Step 3: Build and push the services defined in docker-compose.yml
-      - name: Build and Push Docker Images
+      # Step 4: Build, stop and clean the existing images and containers
+      - name: Build and Push with docker-compose
         run: |
-          docker compose -f docker-compose.yml build
-          docker compose -f docker-compose.yml push
+          docker compose down -v
+          docker compose up --build
+          docker compose push
 
-      # Step 4: Deploy to DigitalOcean
+      # Step 5: (Opcional) Deploy to DigitalOcean
       - name: Deploy to DigitalOcean
-        run: echo "Deploy step here"
+        run: |
+          echo "Deploy step here"
