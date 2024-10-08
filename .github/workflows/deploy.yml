@@ -24,7 +24,7 @@ jobs:
         run: |
           docker compose down -v
           docker compose up -d --build
-          docker tag linktic-front registry.digitalocean.com/linktic-registry/linktic-api:latest
+          docker tag linktic-api registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
       - name: Deploy to DigitalOcean
