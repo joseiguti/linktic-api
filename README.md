@@ -1,6 +1,9 @@
 
 # Documentación API Linktic
 
+![Arquitectura del Proyecto](https://en.joseiguti.com/img/linktic/arquitectura.png)
+
+
 ## 1. Ejecución local
 
 Para ejecutar el proyecto localmente, siga los siguientes pasos:
