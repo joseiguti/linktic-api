@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code
+
+      # Step 1: Checkout the code (para obtener el código actual del repositorio en GitHub)
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -18,18 +19,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to DigitalOcean Docker Registry
+      # Step 3: Log in to DigitalOcean Docker Registry (opcional si no usas Docker Registry puedes eliminar este paso)
       - name: Log in to DigitalOcean Docker Registry
         run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
-      # Step 4: Build and Push Docker image to DigitalOcean Registry
-      - name: Build and Push Docker Image
-        run: |
-          docker pull bitnami/laravel:latest
-          docker tag bitnami/laravel:latest registry.digitalocean.com/linktic-registry/linktic-api:latest
-          docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
-
-      # Step 5: SSH into DigitalOcean Droplet and Deploy the Image
+      # Step 4: SSH into DigitalOcean Droplet, clone repo, and deploy
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -37,17 +31,17 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Autenticar con Docker Registry
-            echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
+            # Clona el repositorio o actualiza el existente
+            if [ ! -d "/root/linktic-api" ]; then
+              git clone https://github.com/joseiguti/linktic-api.git /root/linktic-api
+            else
+              cd /root/linktic-api
+              git pull origin main
+            fi
 
-            # Descargar la última imagen desde el Registry
-            docker pull registry.digitalocean.com/linktic-registry/linktic-api:latest
+            # Navega a la carpeta del repositorio
+            cd /root/linktic-api
 
-            # Ejecutar el contenedor desde la imagen
-            docker run -d --name linktic-api -p 8080:8000 \
-              -e DB_HOST=linktic-db \
-              -e DB_PORT=3306 \
-              -e DB_DATABASE=linkticdb \
-              -e DB_USERNAME=linkticuser \
-              -e DB_PASSWORD=secret \
-              registry.digitalocean.com/linktic-registry/linktic-api:latest
+            # Ejecuta los comandos para detener y reiniciar los contenedores
+            docker-compose down
+            docker-compose up -d
