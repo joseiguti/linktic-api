@@ -6,17 +6,12 @@
 Para ejecutar el proyecto localmente, siga los siguientes pasos:
 
 1. Clone el repositorio.
-2. Instale las dependencias del proyecto:
-   ```bash
-   composer install
-   npm install
-   ```
-3. Ejecute los contenedores utilizando Docker:
+2. Ejecute los contenedores utilizando Docker:
    ```bash
    docker compose down -v
    docker compose up --build
    ```
-4. Esto creará la base de datos y ejecutará las migraciones junto con los seeds.
+3. Esto creará la base de datos y ejecutará las migraciones junto con los seeds.
 
 ## 2. Pruebas unitarias
 
