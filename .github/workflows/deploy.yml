@@ -23,7 +23,7 @@ jobs:
       - name: Build and Push with docker-compose
         run: |
           docker compose down -v
-          docker compose up --build
+          docker compose up -d --build
           docker tag linktic-front registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
