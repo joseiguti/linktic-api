@@ -6,25 +6,36 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
+
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Step 3: Log in to DigitalOcean Docker Registry
       - name: Log in to DigitalOcean Docker Registry
         run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
+      # Step 4: Pull Laravel image from Docker Hub (descargar la imagen)
+      - name: Pull Laravel Image
+        run: |
+          docker pull bitnami/laravel:latest
+
+      # Step 5: Build and Push Docker image to DigitalOcean Registry
       - name: Build and Push with docker-compose
         run: |
           docker compose -f docker-compose.yml build
           docker tag bitnami/laravel:latest registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
+      # Step 6: SSH into DigitalOcean Droplet and Deploy the Image
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
