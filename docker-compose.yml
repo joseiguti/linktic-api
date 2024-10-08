@@ -1,7 +1,7 @@
 services:
     linktic-api:
         image: bitnami/laravel:latest
-        container_name: linktic-api
+        container_name: linktic-api:latest
         environment:
             - DB_HOST=linktic-db
             - DB_PORT=3306
