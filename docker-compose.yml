@@ -15,7 +15,7 @@ services:
         depends_on:
             - linktic-db
             - linktic-redis
-        command: /bin/bash -c "./wait-for-it.sh linktic-db:3306 -- php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"
+        command: /bin/bash -c "composer install && ./wait-for-it.sh linktic-db:3306 -- php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=8000"
 
     linktic-db:
         image: mysql:8.0
