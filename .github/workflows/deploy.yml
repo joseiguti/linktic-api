@@ -11,7 +11,7 @@ jobs:
 
     steps:
 
-      # Step 1: Checkout the code (para obtener el código actual del repositorio en GitHub)
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -42,6 +42,9 @@ jobs:
             # Navega a la carpeta del repositorio
             cd /root/linktic-api
 
-            # Ejecuta los comandos para detener y reiniciar los contenedores
-            docker-compose down
+            # Detener y eliminar contenedores existentes para evitar conflictos
+            docker-compose down --remove-orphans
+            docker rm -f linktic-api || true
+
+            # Levantar los nuevos contenedores
             docker-compose up -d
