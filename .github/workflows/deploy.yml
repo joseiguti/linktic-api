@@ -23,25 +23,20 @@ jobs:
       - name: Log in to DigitalOcean Docker Registry
         run: echo "${{ secrets.DIGITALOCEAN_API_TOKEN }}" | docker login registry.digitalocean.com -u do --password-stdin
 
-      # Step 4: Pull Laravel image from Docker Hub (descargar la imagen)
-      - name: Pull Laravel Image
-        run: |
-          docker pull bitnami/laravel:latest
-
-      # Step 5: Build and Push Docker image to DigitalOcean Registry
+      # Step 4: Build and Push Docker image to DigitalOcean Registry
       - name: Build and Push with docker-compose
         run: |
           docker compose -f docker-compose.yml build
           docker tag bitnami/laravel:latest registry.digitalocean.com/linktic-registry/linktic-api:latest
           docker push registry.digitalocean.com/linktic-registry/linktic-api:latest
 
-      # Step 6: SSH into DigitalOcean Droplet and Deploy the Image
+      # Step 5: SSH into DigitalOcean Droplet and Deploy the Image
       - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DIGITALOCEAN_DROPLET_IP }}
+          host: ${{ secrets.DIGITALOCEAN_DROPLET_IP }}  # Aquí debería estar la IP pública de tu Droplet
           username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # Clave privada para autenticarte
           script: |
             docker pull registry.digitalocean.com/linktic-registry/linktic-api:latest
             docker-compose down
